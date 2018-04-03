@@ -1,40 +1,55 @@
 import socket
-import datetime
+from datetime import datetime
 
-def server_setup:
+PORT = 3000
 
-    sock = socket.socket(
-        socket.AF_INET,
-        socket.SOCK_STREAM,
-        socket.IPPROTO_TCP)
+sock = socket.socket(
+    socket.AF_INET,
+    socket.SOCK_STREAM,
+    socket.IPPROTO_TCP)
 
-    address = ('127.0.0.1', 3000)
-    sock.listen(1)
-
+address = ('127.0.0.1', PORT)
+# sock.listen(1)
+sock.bind(address)
 
 try:
-    sock.bind(address)
+    sock.listen(1)
+    # sock.bind(address)
+    print('--- Starting server on port 3000 at {} ---'.format(datetime.datetime.now().strftime('%c')))
+
+    conn, addr = sock.accept()
+    buffer_length = 8
+
+    message_complete = False
+
+    message = b''
+
+    while not message_complete:
+        part = conn.recv(buffer_length)
+        message += part
+
+        if len(part) < buffer_length:
+            break
+
+    message = message.decode('utf8')
+    print('{} Echoed: {}'.format(datetime.now().strftime('%H:%M:%S %d-%m-%y'), message))
+
+    conn.send(message.encode('utf8'))
+
+
 except socket.error as e:
     print(str(e))
 
-import pdb; pdb.set_trace()
+# import pdb; pdb.set_trace()
 
-buffer_length = 8
-conn, addr = sock.accept()
 
 # print('Connected to: '+addr[0]+':'+str(addr[1]))
 # print(conn)
-message_complete = False
-while not message_complete:
-    part = conn.recv(buffer_length)
-    message += part
-    if len(part) < buffer_length:
-        break
+
 # import pdb; pdb.set_trace()
 
-start_message = '--- Starting server on port 3000 at {} ---'.format(datetime.datetime.now().strftime('%c'))
+# start_message = '--- Starting server on port 3000 at {} ---'.format(datetime.datetime.now().strftime('%c'))
 
-conn.send(message.encode('utf8'))
 
 conn.close()
 sock.close()
