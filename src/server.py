@@ -1,56 +1,48 @@
-import socket
 from datetime import datetime
-
-PORT = 3000
+import socket
 
 sock = socket.socket(
     socket.AF_INET,
     socket.SOCK_STREAM,
     socket.IPPROTO_TCP)
 
+PORT = 3000
+
 address = ('127.0.0.1', PORT)
-# sock.listen(1)
+
 sock.bind(address)
 
 try:
     sock.listen(1)
-    # sock.bind(address)
-    print('--- Starting server on port 3000 at {} ---'.format(datetime.datetime.now().strftime('%c')))
 
+    print('--- Starting server on port {} at {} ---'.format(PORT, datetime.now().strftime('%H:%M:%S %d-%m-%y')))
     conn, addr = sock.accept()
+
     buffer_length = 8
 
     message_complete = False
 
     message = b''
-
     while not message_complete:
         part = conn.recv(buffer_length)
         message += part
-
         if len(part) < buffer_length:
             break
 
     message = message.decode('utf8')
     print('{} Echoed: {}'.format(datetime.now().strftime('%H:%M:%S %d-%m-%y'), message))
 
-    conn.send(message.encode('utf8'))
+    conn.sendall(message.encode('utf8'))
 
+except KeyboardInterrupt:
+    try:
+        conn.close()
+    except NameError:
+        pass
 
-except socket.error as e:
-    print(str(e))
-
-# import pdb; pdb.set_trace()
-
-
-# print('Connected to: '+addr[0]+':'+str(addr[1]))
-# print(conn)
-
-# import pdb; pdb.set_trace()
-
-# start_message = '--- Starting server on port 3000 at {} ---'.format(datetime.datetime.now().strftime('%c'))
-
+    sock.close()
+    print('--- Stopping server on port {} at {} ---'.format(PORT, datetime.now().strftime('%H:%M:%S %d-%m-%y')))
 
 conn.close()
 sock.close()
-print('--- Stop server on port 3000 at {} ---'.format(datetime.datetime.now().strftime('%c')))
+print('--- Stopping server on port {} at {} ---'.format(PORT, datetime.now().strftime('%H:%M:%S %d-%m-%y')))
